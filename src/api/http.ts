@@ -13,7 +13,7 @@ instance.interceptors.response.use(function (response) {
     // debugger
 
     if (response.status === 200) {
-        return response.data.data;
+        return response.data;
     } else {
         ElMessage.error('检查状态码')
     }

@@ -1,45 +1,67 @@
 <script lang="ts" setup="setup">
 import {Search} from '@element-plus/icons-vue'
 import {ref} from "vue";
-
 import http from "@/api/http";
+
 
 const input = ref('')
 const centerDialogVisible = ref(false)
+const keyInfo = ref('')
+const date = new Date()
+const infoImg = ref('')
+const logQrCheck = () => {
+
+  setInterval(() => {
+    http({
+      methods: 'post',
+      url: `/login/qr/check?key=${keyInfo.value}&timerstamp=${date.getTime()}`,
+      withCredentials: true
+    })
+        .then((res: any) => {
+          console.log(res)
+        })
+        .catch((err: any) => {
+          console.log(err)
+        })
+  }, 2500);  //轮询
+
+}
+const logQrCreate = () => {
+  http({
+    methods: 'post',
+    url: `/login/qr/create?key=${keyInfo}&qrimg=${true}&timerstamp=${date.getTime()}`,
+    withCredentials: true
+  })
+      .then((res: any) => {
+        console.log(res)
+        infoImg.value = res.data.qrimg
+        logQrCheck()
+      })
+      .catch((err: any) => {
+        console.log(err)
+      })
+}
+const logQrKey = () => {
+  http({
+    url: `/login/qr/key?timerstamp=${date.getTime()}`,
+    withCredentials: true
+  })
+      .then((res: any) => {
+        console.log(res)
+        keyInfo.value = res.data.unikey
+        logQrCreate()
+      })
+      .catch((err: any) => {
+        console.log(err)
+      })
+}
+const logApi = () => {
+  logQrKey()
+}
 
 const goLogin = () => {
   centerDialogVisible.value = true
-  // axios.get('https://netease-cloud-music-api-xi-lake.vercel.app/login/qr/key')
-  //     .then(res => {
-  //       let paramsA: any = {
-  //         key: res.data.data.unikey,
-  //         qrimg: '1',
-  //       }
-  //       axios.get('https://netease-cloud-music-api-xi-lake.vercel.app/login/qr/create', paramsA)
-  //           .then(res => {
-  //             console.log(res)
-  //           })
-  //           .catch(res => {
-  //             console.log(res)
-  //           })
-  //     })
-  //     .catch(res => {
-  //       console.log(res)
-  //     })
   logApi()
-}
-const logApi = () => {
-  http.get('/login/qr/key')
-      .then((res: any) => {
-        console.log(res.unikey)
-        let params: any = {
-          key: res.unikey
-        }
-        http.get(`'/login/qr/create?key=${res.unikey}'`)
-            .then((res: any) => {
-              console.log(res)
-            })
-      })
 }
 
 </script>
@@ -64,7 +86,7 @@ const logApi = () => {
     <div class="ml-5">
       <el-button round size="large" type="info" @click="goLogin">登录</el-button>
       <el-dialog v-model="centerDialogVisible" class="bg-black" title="登录" width="30%">
-        <span>1</span>
+        <span><img :src="infoImg" alt=""></span>
         <template #footer>
           <div>123</div>
         </template>
