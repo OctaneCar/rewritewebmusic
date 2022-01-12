@@ -1,67 +1,98 @@
 <script lang="ts" setup="setup">
 import {Search} from '@element-plus/icons-vue'
-import {ref} from "vue";
+import {reactive, Ref, ref, UnwrapRef} from "vue";
 import http from "@/api/http";
+import {ElForm, ElMessage} from "element-plus";
 
 
-const input = ref('')
+const inputSearch = ref('')
+const isShow = ref(false)
+const times = ref(30)
+const telRexg = /^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\d{8}$/
 const centerDialogVisible = ref(false)
-const keyInfo = ref('')
-const date = new Date()
-const infoImg = ref('')
-const logQrCheck = () => {
+const infoForm = reactive({
+  phoneNum: '',
+  captcha: ''
+})
+const rules = reactive({
+  phoneNum: [{
+    validator: telRexg,
+    trigger: 'blur'
+  }],
+  captcha: [{
+    required: true,
+    message: '请输入验证码',
+    trigger: 'blur'
+  }]
+})
+const ruleFormRef = ref<InstanceType<typeof ElForm>>()
 
-  setInterval(() => {
-    http({
-      methods: 'post',
-      url: `/login/qr/check?key=${keyInfo.value}&timerstamp=${date.getTime()}`,
-      withCredentials: true
-    })
-        .then((res: any) => {
-          console.log(res)
-        })
-        .catch((err: any) => {
-          console.log(err)
-        })
-  }, 2500);  //轮询
-
-}
-const logQrCreate = () => {
+const getCaptcha = () => {
   http({
     methods: 'post',
-    url: `/login/qr/create?key=${keyInfo}&qrimg=${true}&timerstamp=${date.getTime()}`,
-    withCredentials: true
+    url: `/captcha/sent?phone=${infoForm.phoneNum}&timerstamp=${Date.now()}`,
   })
       .then((res: any) => {
         console.log(res)
-        infoImg.value = res.data.qrimg
-        logQrCheck()
+        if (res.data) {
+          isShow.value = true
+          tiemer()
+        }
       })
       .catch((err: any) => {
         console.log(err)
       })
-}
-const logQrKey = () => {
-  http({
-    url: `/login/qr/key?timerstamp=${date.getTime()}`,
-    withCredentials: true
-  })
-      .then((res: any) => {
-        console.log(res)
-        keyInfo.value = res.data.unikey
-        logQrCreate()
-      })
-      .catch((err: any) => {
-        console.log(err)
-      })
-}
-const logApi = () => {
-  logQrKey()
-}
 
-const goLogin = () => {
+
+}
+const tiemer = () => {
+  let clock = setInterval(() => {
+    times.value--
+    if (times.value === 0) {
+      window.clearInterval(clock)
+      isShow.value = false
+    }
+  }, 1000)
+}
+const getInfo = () => {
+  http({
+    methods: 'post',
+    url: `/captcha/verify?phone=${infoForm.phoneNum}&captcha=${infoForm.captcha}&timerstamp=${Date.now()}`
+  })
+      .then((res: any) => {
+        http({
+          methods: 'post',
+          url: `/login/cellphone?phone=${infoForm.phoneNum}&captcha=${infoForm.captcha}&timerstamp=${Date.now()}`
+        })
+            .then((res: any) => {
+              console.log(res)
+            })
+            .catch((err: any) => {
+              console.log(err)
+            })
+
+      })
+      .catch((err: any) => {
+        console.log(err)
+      })
+}
+const submitForm = () => {
+
+  if (!telRexg.test(infoForm.phoneNum)) {
+    ElMessage.error('请输入完整电话号码')
+    infoForm.phoneNum = ''
+    return false
+  }
+  if (!(infoForm.captcha.length === 4)) {
+    ElMessage.error('请输入完整验证码')
+    infoForm.captcha = ''
+    return false
+  }
+
+  getInfo()
+}
+const goLogin = async () => {
   centerDialogVisible.value = true
-  logApi()
 }
 
 </script>
@@ -81,29 +112,70 @@ const goLogin = () => {
       </ul>
     </div>
     <div class="ml-5">
-      <el-input v-model="input" :prefix-icon="Search" class="focus:bg-violet-100" clearable placeholder="音乐/用户/电台"/>
+      <el-input v-model="inputSearch" :prefix-icon="Search" class="focus:bg-violet-100" clearable
+                placeholder="音乐/用户/电台"/>
     </div>
     <div class="ml-5">
       <el-button round size="large" type="info" @click="goLogin">登录</el-button>
       <el-dialog v-model="centerDialogVisible" class="bg-black" title="登录" width="30%">
-        <span><img :src="infoImg" alt=""></span>
-        <template #footer>
-          <div>123</div>
-        </template>
+        <el-form
+            ref="ruleFormRef"
+            :model="infoForm"
+            :rules="rules"
+            class="demo-ruleForm"
+            label-width="120px"
+            status-icon
+        >
+          <el-form-item prop="num">
+            <el-input
+                v-model="infoForm.phoneNum"
+                autocomplete="off"
+                class="num-input"
+                placeholder="请输入手机号"
+                type="text"
+            ></el-input>
+          </el-form-item>
+          <el-form-item prop="captcha">
+            <el-input
+                v-model="infoForm.captcha"
+                class="captcha-input"
+                type="text"
+            ></el-input>
+            <el-button :disabled="isShow" class="getCaptcha-btn" @click="getCaptcha">{{
+                isShow ? times - 1 : '获取验证码'
+              }}
+            </el-button>
+          </el-form-item>
+          <el-form-item>
+            <el-button class="login-btn" type="success" @click="submitForm(ruleFormRef)"
+            >登录
+            </el-button
+            >
+          </el-form-item>
+        </el-form>
+
       </el-dialog>
     </div>
   </div>
 </template>
 
 <style scoped>
-.el-input {
-  border-radius: 32px;
-  width: 158px;
-  height: 32px;
+
+.getCaptcha-btn {
+  font-size: 10px;
+  width: 70px;
+  margin-left: 10px;
 }
 
-.el-input:focus {
-  border: none;
+.num-input {
+  width: 160px;
 }
 
+.captcha-input {
+  width: 80px;
+}
+
+.login-btn {
+  width: 160px;
+}
 </style>

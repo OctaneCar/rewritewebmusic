@@ -4,6 +4,9 @@ import {ElMessage} from "element-plus";
 const instance = axios.create({
     baseURL: 'https://netease-cloud-music-api-xi-lake.vercel.app',
     timeout: 7000,
+    defaults: {
+        withCredentials: true
+    }
 });
 
 instance.interceptors.response.use(function (response) {

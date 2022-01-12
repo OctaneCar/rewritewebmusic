@@ -1,4 +1,6 @@
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+import myhead from '@/pages/head/head.vue'
+</script>
 
 <template>
   <div id="main">
