@@ -1,8 +1,9 @@
 <script lang="ts" setup="setup">
-import {Search} from '@element-plus/icons-vue'
-import {reactive, Ref, ref, UnwrapRef} from "vue";
+import {Search, Avatar, CloseBold} from '@element-plus/icons-vue'
+import {reactive, ref,} from "vue";
 import http from "@/api/http";
 import {ElForm, ElMessage} from "element-plus";
+import loginInfo from "@/ts/loginInfo";
 
 
 const inputSearch = ref('')
@@ -26,6 +27,7 @@ const rules = reactive({
   }]
 })
 const ruleFormRef = ref<InstanceType<typeof ElForm>>()
+
 
 const getCaptcha = () => {
   http({
@@ -66,6 +68,8 @@ const getInfo = () => {
         })
             .then((res: any) => {
               console.log(res)
+              localStorage.setItem('userProfile', JSON.stringify(res))
+              centerDialogVisible.value = false
             })
             .catch((err: any) => {
               console.log(err)
@@ -91,18 +95,21 @@ const submitForm = () => {
 
   getInfo()
 }
-const goLogin = async () => {
+const goLogin = () => {
   centerDialogVisible.value = true
 }
+
 
 </script>
 
 <template>
   <div class="h-20 bg-b text-zinc-300 flex justify-center items-center" style="background-color: #333333">
+
     <div class="mr-24 flex items-center">
       <img alt="" class="w-14 h-14 rounded-full" src="@/assets/images/Logon.png">
       <h1 class="text-2xl font-bold ml-3">网易云音乐</h1>
     </div>
+
     <div class="h-full">
       <ul class="flex h-full ">
         <li class="w-24 mr-2 hover:bg-black h-full flex justify-center items-center cursor-pointer">发现音乐</li>
@@ -111,11 +118,13 @@ const goLogin = async () => {
         <li class="w-24 hover:bg-black h-full flex justify-center items-center cursor-pointer">下载</li>
       </ul>
     </div>
+
     <div class="ml-5">
       <el-input v-model="inputSearch" :prefix-icon="Search" class="focus:bg-violet-100" clearable
                 placeholder="音乐/用户/电台"/>
     </div>
-    <div class="ml-5">
+
+    <div v-if="!loginInfo.profile.avatarUrl" class="ml-5">
       <el-button round size="large" type="info" @click="goLogin">登录</el-button>
       <el-dialog v-model="centerDialogVisible" class="bg-black" title="登录" width="30%">
         <el-form
@@ -156,6 +165,31 @@ const goLogin = async () => {
 
       </el-dialog>
     </div>
+
+    <div v-if="loginInfo.profile.avatarUrl" class="ml-5">
+      <el-dropdown>
+        <el-avatar :size="50" :src="loginInfo.profile.avatarUrl" size="small"></el-avatar>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item>
+              <el-icon>
+                <avatar/>
+              </el-icon>
+              我的主页
+            </el-dropdown-item>
+            <el-dropdown-item>
+              <el-icon>
+                <close-bold/>
+              </el-icon>
+              退出
+            </el-dropdown-item>
+
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
+    </div>
+
+
   </div>
 </template>
 
@@ -164,18 +198,18 @@ const goLogin = async () => {
 .getCaptcha-btn {
   font-size: 10px;
   width: 70px;
-  margin-left: 10px;
+  margin-left: 20px;
 }
 
 .num-input {
-  width: 160px;
+  width: 200px;
 }
 
 .captcha-input {
-  width: 80px;
+  width: 100px;
 }
 
 .login-btn {
-  width: 160px;
+  width: 200px;
 }
 </style>

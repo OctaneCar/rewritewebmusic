@@ -5,6 +5,7 @@ import myhead from '@/pages/head/head.vue'
 <template>
   <div id="main">
     <myhead></myhead>
+    <router-view/>
   </div>
 </template>
 
