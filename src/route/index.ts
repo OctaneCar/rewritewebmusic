@@ -4,7 +4,7 @@ import {createRouter, createWebHashHistory,} from "vue-router";
 const routes: RouteRecordRaw[] = [];
 
 // vite新特性————多模块引入
-const files = import.meta.globEager('./module/*.ts');
+const files = import.meta.globEager('/src/route/modules/*.ts');
 for (const key in files) {
     routes.push(...files[key].default);
 }

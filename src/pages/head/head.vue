@@ -4,6 +4,7 @@ import {reactive, ref,} from "vue";
 import http from "@/api/http";
 import {ElForm, ElMessage} from "element-plus";
 import loginInfo from "@/ts/loginInfo";
+import {useRouter} from "vue-router";
 
 
 const inputSearch = ref('')
@@ -27,6 +28,7 @@ const rules = reactive({
   }]
 })
 const ruleFormRef = ref<InstanceType<typeof ElForm>>()
+const myRouter = useRouter();
 
 
 const getCaptcha = () => {
@@ -98,6 +100,18 @@ const submitForm = () => {
 const goLogin = () => {
   centerDialogVisible.value = true
 }
+const myInfo = () => {
+
+  myRouter.push({
+    name: 'myinfo'
+  })
+
+}
+const exit = () => {
+}
+const icon = () => {
+  myRouter.push({path: '/#'})
+}
 
 
 </script>
@@ -105,7 +119,7 @@ const goLogin = () => {
 <template>
   <div class="h-20 bg-b text-zinc-300 flex justify-center items-center" style="background-color: #333333">
 
-    <div class="mr-24 flex items-center">
+    <div class="mr-24 flex items-center" @click="icon">
       <img alt="" class="w-14 h-14 rounded-full" src="@/assets/images/Logon.png">
       <h1 class="text-2xl font-bold ml-3">网易云音乐</h1>
     </div>
@@ -171,13 +185,13 @@ const goLogin = () => {
         <el-avatar :size="50" :src="loginInfo.profile.avatarUrl" size="small"></el-avatar>
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item>
+            <el-dropdown-item @click="myInfo">
               <el-icon>
                 <avatar/>
               </el-icon>
               我的主页
             </el-dropdown-item>
-            <el-dropdown-item>
+            <el-dropdown-item @click="exit">
               <el-icon>
                 <close-bold/>
               </el-icon>
