@@ -112,6 +112,12 @@ const exit = () => {
 const icon = () => {
   myRouter.push({path: '/#'})
 }
+const searchKeyWord = () => {
+  http.post(`/search/suggest?keywords=${inputSearch.value}`)
+      .then((res: any) => {
+        console.log(res)
+      })
+}
 
 
 </script>
@@ -135,7 +141,7 @@ const icon = () => {
 
     <div class="ml-5">
       <el-input v-model="inputSearch" :prefix-icon="Search" class="focus:bg-violet-100" clearable
-                placeholder="音乐/用户/电台"/>
+                placeholder="音乐/用户/电台" @input='searchKeyWord'/>
     </div>
 
     <div v-if="!loginInfo.profile.avatarUrl" class="ml-5">

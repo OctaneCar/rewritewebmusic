@@ -10,7 +10,11 @@ const playlist = ref([''])
 const albumList = ref([''])
 const recommendList = ref([''])
 const rankListA = ref([''])
-const newArr = ref([''])
+const listA = ref([''])
+const rankListB = ref([''])
+const listB = ref([''])
+const rankListC = ref([''])
+const listC = ref([''])
 
 const getBanner = () => {
   http.get('/banner?type=0')
@@ -37,13 +41,33 @@ const getDailyList = () => {
       })
 
 }
-const getRankListDetailA = () => {
+const getRankListDataA = () => {
   http.get('/playlist/detail?id=19723756')
       .then((res: any) => {
         rankListA.value = res.playlist
-        newArr.value = res.playlist.tracks.slice(0.10)
-        console.log(newArr.value.slice(0, 9))
+        listA.value = spliceNum(res.playlist.tracks)
       })
+}
+const getRankListDataB = () => {
+  http.get('/playlist/detail?id=5453912201')
+      .then((res: any) => {
+        rankListB.value = res.playlist
+        listB.value = spliceNum(res.playlist.tracks)
+      })
+}
+const getRankListDataC = () => {
+  http.get('/playlist/detail?id=3778678')
+      .then((res: any) => {
+        rankListC.value = res.playlist
+        listC.value = spliceNum(res.playlist.tracks)
+      })
+}
+
+const spliceNum = (arr: Array<any>) => {
+  return arr.splice(0, 10)
+}
+const indexMethod = (index: number) => {
+  return index + 1
 }
 
 
@@ -51,7 +75,9 @@ getBanner()
 getHotList()
 getNewAlbum()
 getDailyList()
-getRankListDetailA()
+getRankListDataA()
+getRankListDataB()
+getRankListDataC()
 </script>
 
 <template>
@@ -127,53 +153,24 @@ getRankListDetailA()
       <div class="mt-3 mb-3" style=" border-bottom: 2px solid #C10D0C;"></div>
 
       <div class="flex">
-        <div style="border: 1px solid crimson;width: 230px">
-          <dl>
-            <dt class="flex">
-              <div style="width: 80px;height: 80px">
-                <img :src="rankListA.coverImgUrl" alt="">
-              </div>
-              <div><h2>{{ rankListA.name }}</h2></div>
-            </dt>
-            <dd>
-              <ol v-for="(items,index) in newArr.slice(0,10)" key="{{index}}">
-                <li style="border: 1px solid wheat"><span>{{ index + 1 }}</span>{{ items.name }}</li>
-              </ol>
-            </dd>
-          </dl>
-        </div>
 
-        <div style="border: 1px solid crimson;width: 230px">
-          <dl>
-            <dt class="flex">
-              <div style="width: 80px;height: 80px">
-                <img :src="rankListA.coverImgUrl" alt="">
-              </div>
-              <div><h2>{{ rankListA.name }}</h2></div>
-            </dt>
-            <dd>
-              <ol v-for="(items,index) in newArr.slice(0,10)" key="{{index}}">
-                <li style="border: 1px solid wheat"><span>{{ index + 1 }}</span>{{ items.name }}</li>
-              </ol>
-            </dd>
-          </dl>
-        </div>
+        <el-table :data="listA" :fit="false" :show-header="false" stripe
+                  style="width: 100%;cursor: pointer;font-size: 10px">
+          <el-table-column :index="indexMethod" type="index" width="40px"/>
+          <el-table-column prop="name" width="195px"/>
+        </el-table>
 
-        <div style="border: 1px solid crimson;width: 230px">
-          <dl>
-            <dt class="flex">
-              <div style="width: 80px;height: 80px">
-                <img :src="rankListA.coverImgUrl" alt="">
-              </div>
-              <div><h2>{{ rankListA.name }}</h2></div>
-            </dt>
-            <dd>
-              <ol v-for="(items,index) in newArr.slice(0,10)" key="{{index}}">
-                <li style="border: 1px solid wheat"><span>{{ index + 1 }}</span>{{ items.name }}</li>
-              </ol>
-            </dd>
-          </dl>
-        </div>
+        <el-table :data="listB" :fit="false" :show-header="false" stripe
+                  style="width: 100%;cursor: pointer;font-size: 10px">
+          <el-table-column :index="indexMethod" type="index" width="40px"/>
+          <el-table-column prop="name" width="195px"/>
+        </el-table>
+
+        <el-table :data="listC" :fit="false" :show-header="false" stripe
+                  style="width: 100%;cursor: pointer;font-size: 10px">
+          <el-table-column :index="indexMethod" type="index" width="40px"/>
+          <el-table-column prop="name" width="195px"/>
+        </el-table>
 
       </div>
 
@@ -244,5 +241,13 @@ getRankListDetailA()
   line-height: 150px;
   margin: 0;
   text-align: center;
+}
+
+.li-box {
+  @apply hover:bg-violet-100
+  cursor-pointer
+  border-2
+  border-sky-500
+  text-center
 }
 </style>
